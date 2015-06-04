@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Socket Test</title>
+    
+    <script src="/socket.io/socket.io.js"></script> 
+    <style>
+        .controls {i
+            width: 30%;
+            height: auto;
+            min-height: 100px;
+        }
+    </style>
+</head>
+<body>
+    <h1 id='console1'></h1><br>
+    <h1 id='console2'></h1><br>
+    <h1 id='console3'></h1><br>
+</body>
+    <script type="text/javascript">
+        var socket = io();
+    
+        var threshX=0;
+        var threshY=0;        
+    
+        if (window.DeviceOrientationEvent) {
+  
+            // Listen for the deviceorientation event and handle the raw data
+            window.addEventListener('deviceorientation', function(eventData) {
+                // gamma is the left-to-right tilt in degrees, where right is positive
+                var tiltLR = eventData.gamma;
+
+                // beta is the front-to-back tilt in degrees, where front is positive
+                var tiltFB = eventData.beta;
+
+                // call our orientation event handler
+                //deviceOrientationHandler(tiltLR, tiltFB, dir);
+    
+                document.getElementById('console1').innerHTML = tiltLR;
+                document.getElementById('console2').innerHTML = tiltFB;
+                
+                if ( (parseInt(tiltFB-threshY)/10!=0) && (parseInt(tiltLR-threshX)/10!=0) ) { // if rotated significantly
+                    if (threshY!=parseInt(tiltFB/10) && threshX!=parseInt(tiltLR/10) ) {
+                        socket.emit('move', {'vert': parseInt(tiltFB/10), 'hori': parseInt(tiltLR/10)} );
+                        threshY = parseInt(tiltFB/10);
+                        threshX = parseInt(tiltLR/10);
+                    }
+                }
+
+            }, false);
+        } else {
+                document.getElementById("console1").innerHTML = "Not supported."
+        }
+            
+    </script>
+
+</html>
